@@ -1,6 +1,5 @@
 
 
-
 class _ACDDModelv1p3(object):
     """
     Data class containing the list of highly recommend, recommended and suggest attributes
