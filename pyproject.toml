@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cf_data_struct"
+description = "Data structures compliant to Climate & Forecast data conventions"
+readme = "README.md"
+version = "0.1"
+requires-python = ">=3.9"
+license = "MIT"
+keywords = []
+authors = [
+  { name = "Stefan Hendricks", email = "stefan.hendricks@awi.de" },
+]
+classifiers = [
+  "Topic :: Scientific/Engineering",
+  "Development Status :: 3 - Alpha",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+]
+
+dependencies = [
+    "pydantic",
+    "pydandtic-yaml",
+    "xarray"
+]
+
+[project.urls]
+Homepage = "https://github.com/pysiral/cf-data-struct"
+Documentation = "https://github.com/pysiral/cf-data-struct#readme"
+Issues = "https://github.com/pysiral/cf-data-struct/issues"
+Source = "https://github.com/pysiral/cf-data-struct"
