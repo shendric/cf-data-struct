@@ -1,3 +1,31 @@
+# -*- coding: utf-8 -*-
+
+"""
+The datastruct models contains the data structures
+"""
+
+__author__ = "Stefan Hendricks <stefan.hendricks@awi.de>"
+
+
+class BaseDataStruct(object):
+
+    def __init__(self) -> None:
+        self._attrs = None
+        self._vars = None
+        self._dims = None
+
+
+class TrajectoryDataStruct(BaseDataStruct):
+
+    def __init__(self) -> None:
+        super(TrajectoryDataStruct, self).__init__()
+
+
+class GeospatialGridDataStruct(BaseDataStruct):
+
+    def __init__(self) -> None:
+        super(GeospatialGridDataStruct, self).__init__()
+
 #
 # import yaml
 # from pathlib import Path
