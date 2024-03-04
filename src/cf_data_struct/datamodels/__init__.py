@@ -4,3 +4,9 @@
 """
 
 __author__ = "Stefan Hendricks <stefan.hendricks@awi.de>"
+
+
+class GlobalAttributes(object):
+
+    def __init__(self):
+        pass

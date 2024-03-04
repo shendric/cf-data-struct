@@ -6,25 +6,31 @@ The datastruct models contains the data structures
 
 __author__ = "Stefan Hendricks <stefan.hendricks@awi.de>"
 
+__all__ = ["datamodels", "datastruct"]
 
-class BaseDataStruct(object):
+from cf_data_struct.datastruct import (
+    TrajectoryCFStruct, GridCFStruct,
+    CFVariable
+)
 
-    def __init__(self) -> None:
-        self._attrs = None
-        self._vars = None
-        self._dims = None
+# class BaseDataStruct(object):
+#
+#     def __init__(self) -> None:
+#         self._attrs = None
+#         self._vars = None
+#         self._dims = None
 
-
-class TrajectoryDataStruct(BaseDataStruct):
-
-    def __init__(self) -> None:
-        super(TrajectoryDataStruct, self).__init__()
-
-
-class GeospatialGridDataStruct(BaseDataStruct):
-
-    def __init__(self) -> None:
-        super(GeospatialGridDataStruct, self).__init__()
+#
+# class TrajectoryDataStruct(BaseDataStruct):
+#
+#     def __init__(self) -> None:
+#         super(TrajectoryDataStruct, self).__init__()
+#
+#
+# class GeospatialGridDataStruct(BaseDataStruct):
+#
+#     def __init__(self) -> None:
+#         super(GeospatialGridDataStruct, self).__init__()
 
 #
 # import yaml

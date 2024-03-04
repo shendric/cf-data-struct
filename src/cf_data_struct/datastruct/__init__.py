@@ -9,8 +9,9 @@ __author__ = "Stefan Hendricks <stefan.hendricks@awi.de>"
 from typing import List, Dict, Tuple
 import numpy as np
 import xarray as xr
+from pydantic import BaseModel
 
-from .datamodels import GlobalAttributes
+from cf_data_struct.datamodels import GlobalAttributes
 
 VALID_DATATYPES = ["Grid", "Trajectory"]
 VALID_VARIABLE_TYPES = ["Standard", "Flag", "Uncertainty"]
@@ -21,7 +22,7 @@ class CFStructBaseClass(object):
     def __init__(
             self,
             datatype: str = None,
-            gattrs: GlobalAttriubtes = None,
+            gattrs: GlobalAttributes = None,
             dataset: CFStructDataSet = None
     ) -> None:
         """
@@ -45,14 +46,15 @@ class CFStructBaseClass(object):
 class TrajectoryCFStruct(CFStructBaseClass):
 
     def __init__(self, **kwargs):
-        super(TrajectoryCFStruct, self).__init__(datatype="Grid", **kwargs)
+        super(TrajectoryCFStruct, self).__init__(datatype="Trajectory", **kwargs)
+
 
 
 class GridCFStruct(CFStructBaseClass):
 
     def __init__(self, **kwargs):
         super(GridCFStruct, self).__init__(datatype="Grid", **kwargs)
-
+        self.grid_mapping = None
 
 class CFVariable(object):
 
@@ -74,8 +76,12 @@ class CFVariable(object):
 
         self._variable_type = variable_type
         self._name = name
-        self.value = value
+        self._value = value
         self._dims = dims
         self._attrs = attrs
 
     def to_xarray_var(self) -> xr.Variable:
+        pass
+
+
+    @property

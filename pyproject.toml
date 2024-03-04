@@ -23,6 +23,7 @@ classifiers = [
 ]
 
 dependencies = [
+    "numpy",
     "pydantic",
     "pydantic-yaml",
     "xarray"
