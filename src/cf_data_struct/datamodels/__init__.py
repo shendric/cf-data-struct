@@ -6,7 +6,7 @@
 __author__ = "Stefan Hendricks <stefan.hendricks@awi.de>"
 
 from typing_extensions import Annotated
-from typing import Optional, Iterable, Tuple, Union
+from typing import Optional, Iterable, Tuple, Union, List
 
 import numpy as np
 from pydantic import BaseModel, Field, field_validator, model_validator
@@ -40,7 +40,7 @@ class VariableAttributes(BaseModel):
     ancillary_variables: Optional[str] = None
     coverage_content_type: Annotated[Optional[str], Field(validate_default=False)] = None
     flag_meanings: Optional[str] = None
-    flag_values: Optional[Iterable[Union[int | float]]] = None
+    flag_values: Optional[List[numeric]] = None
     valid_min: Optional[numeric] = None
     valid_max: Optional[numeric] = None
 
