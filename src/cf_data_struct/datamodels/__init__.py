@@ -6,9 +6,8 @@
 __author__ = "Stefan Hendricks <stefan.hendricks@awi.de>"
 
 from typing_extensions import Annotated
-from typing import Optional, Iterable, Tuple, Union, List
+from typing import Optional, Union, List, Tuple
 
-import numpy as np
 from pydantic import BaseModel, Field, field_validator, model_validator, Extra
 
 # ISO 19115-1 codes
@@ -23,16 +22,30 @@ VALID_COVERAGE_CONTENT_TYPE = [
     "coordinate"
 ]
 
+VALID_CALENDARS = [
+    "gregorian",
+    "standard",
+    "proleptic_gregorian",
+    "noleap",
+    "365_day",
+    "all_leap",
+    "366_day",
+    "360_day",
+    "julian",
+    "none"
+]
+
 numeric = Union[int, float]
+flag_dtypes = Union[int, bytes]
 
 
-class GlobalAttributes(object):
+class BasicGlobalAttributes(object):
 
     def __init__(self):
         pass
 
 
-class CFVarAttrs(BaseModel, extra=Extra.allow):
+class BasicVarAttrs(BaseModel, extra=Extra.allow):
     """
     Variable Attributes according to the CF Conventions:
     https://cfconventions.org/cf-conventions/cf-conventions.html#_description_of_the_data
@@ -41,22 +54,22 @@ class CFVarAttrs(BaseModel, extra=Extra.allow):
     that this pydantic.Basemodel holds all fields and only enforces the use of
     `long_name` as the basic common denominator of all variable types.
 
-    Children classes can and should be used to add custom validtors for specific
-    variable types, e.g. flags, gridded variables etc. Combinations are possible,
-    e.g. gridded flags.
+    Children classes should overwrite the fields whenever necessary and add their
+    own validators. Combinations are also possible.
     """
 
     long_name: str
     standard_name: Optional[str] = None
+    scale_factor: Optional[numeric] = None
+    add_offset: Optional[numeric] = None
+    actual_range: Optional[Tuple[numeric, numeric]] = None
+    missing_value: Optional[numeric] = None
     comment: Optional[str] = None
     units: Optional[str] = None
     ancillary_variables: Optional[str] = None
     coverage_content_type: Annotated[Optional[str], Field(validate_default=False)] = None
-    flag_meanings: Optional[str] = None
-    flag_values: Optional[List[numeric]] = None
     valid_min: Optional[numeric] = None
     valid_max: Optional[numeric] = None
-    grid_mapping: Optional[str] = None
 
     # noinspection PyNestedDecorators
     @field_validator("coverage_content_type")
@@ -67,25 +80,35 @@ class CFVarAttrs(BaseModel, extra=Extra.allow):
         return coverage_content_type
 
 
-class FlagVarAttrs(CFVarAttrs):
+class FlagVarAttrs(BasicVarAttrs):
+    flag_meanings: str
+    flag_values: List[flag_dtypes]
+    unit: str = "1"
 
     @model_validator(mode="after")
-    def has_flag_attributes(self):
-        if self.flag_values is None:
-            raise ValueError(f"{self.__class__.__name__} requires attribute `flag_values`")
-        if self.flag_meanings is None:
-            raise ValueError(f"{self.__class__.__name__} requires attribute `flag_meanings`")
-        if len(self.flag_values) != len(self.flag_meanings.split()):
-            raise ValueError(f"{self.flag_values=} and {self.flag_meanings} does not match")
+    @classmethod
+    def has_flag_attributes(cls, values):
+        if len(values.flag_values) != len(values.flag_meanings.split()):
+            raise ValueError(f"{values.flag_values=} and {values.flag_meanings} does not match")
 
 
-class GridVarAttrs(CFVarAttrs):
+class TimeVarAttrs(BaseModel):
+    long_name: str
+    units: Optional[str]
+    calendar: Optional[Optional[str], Field(validate_default=True)] = "none"
 
-    @model_validator(mode="after")
-    def has_grid_attributes(self):
-        if self.grid_mapping is None:
-            raise ValueError(f"{self.__class__.__name__} requires attribute `grid_mapping`")
+    @field_validator("calendar")
+    @classmethod
+    def valid_calendar(cls, calendar: str) -> str:
+        if calendar not in VALID_CALENDARS:
+            raise ValueError(f"{calendar=} not in {VALID_CALENDARS=}")
+        return calendar
 
 
-class GridFlagAttrs(FlagVarAttrs, GridVarAttrs):
+class GridVarAttrs(BasicVarAttrs):
+    grid_mapping: str
+    cell_type: str = None
+
+
+class GridFlagVarAttrs(FlagVarAttrs, GridVarAttrs):
     pass
