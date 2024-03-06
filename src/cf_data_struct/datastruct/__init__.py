@@ -124,6 +124,7 @@ class CFStructBaseClass(object):
         self._datatype = datatype
         self.gattrs = attributes if attributes is not None else BasicCFGlobalAttributes()
         self._dims = {}
+        self._dim_shape = {}
         self._vars = {}
         self._var_id_dict = {}
 
@@ -144,13 +145,19 @@ class CFStructBaseClass(object):
         if not isinstance(dimension, CFVariable):
             raise ValueError(f"{dimension=} [type={type(dimension)}] is not of type CFVariable")
         self._dims[dimension.name] = dimension
+        self._dim_shape[dimension.name] = dimension.value.shape[0]
 
-    def add_variable(self, var: CFVariable) -> None:
+    def add_variable(
+            self,
+            var: CFVariable,
+            overwrite: bool = False,
+    ) -> None:
         """
         Add a variable to the data structure. Requirements are that the dimensions are already
         known to the data structure.
 
         :param var: The variable to be added. Must be of type cf_data_struct.CFVariable
+        :param overwrite: Overwrite existing variables checked by variable name (default=False)
 
         :raises: ValueError:
 
@@ -165,8 +172,34 @@ class CFStructBaseClass(object):
         if not set(var.dims).issubset(self._dims):
             raise ValueError(f"Not all variable dimensions {var.dims=} present in {self.dims=}")
 
+        # Check if dimensions are correct
+        expected_dims = self.get_dimensions(var.dims)
+        if var.value.shape != expected_dims:
+            raise ValueError(f"Dimension of {var.name} not correct: {var.value.shape} != {expected_dims}")
+
+        # Check if variable already exists
+        if variable_exists := var.name in self._vars and not overwrite:
+            raise ValueError(f"{var.name} already in dataset [{self.variable_names}]")
+        overwrite_ok = variable_exists and overwrite
+
+        # Check if variable id exists
+        if var.id in self.variable_ids and not overwrite_ok:
+            raise ValueError(f"{var.id=} already exists in dataset [{self.variable_ids}]")
+
         self._vars[var.name] = var
         self._var_id_dict[var.id] = var.name
+
+    def get_dimensions(self, dim_names: List[str]) -> List[int]:
+        """
+        Return the dimenions as shape list
+
+        :param dim_names: A list of dim names
+
+        :return:
+        """
+        return []
+
+
 
     @property
     def datatype(self) -> str:
@@ -176,6 +209,16 @@ class CFStructBaseClass(object):
     def dims(self) -> List[str]:
         return list(self._dims.keys())
 
+    @property
+    def variable_names(self) -> List[str]:
+        return list(self._vars.keys())
+
+    @property
+    def variable_id_dict(self) -> Dict:
+        return self._var_id_dict.copy()
+    @property
+    def variable_ids(self) -> List[str]:
+        return list(self._var_id_dict.keys())
 
 class TrajectoryCFStruct(CFStructBaseClass):
 

@@ -23,6 +23,7 @@ classifiers = [
 ]
 
 dependencies = [
+    "loguru",
     "numpy",
     "pydantic",
     "pydantic-yaml",
