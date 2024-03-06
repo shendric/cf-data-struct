@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """
+This
 """
 
 __author__ = "Stefan Hendricks <stefan.hendricks@awi.de>"
@@ -39,10 +40,13 @@ numeric = Union[int, float]
 flag_dtypes = Union[int, bytes]
 
 
-class BasicGlobalAttributes(object):
-
-    def __init__(self):
-        pass
+class BasicCFGlobalAttributes(BaseModel):
+    title: str = None
+    institution: str = None
+    source: str = None
+    history: str = None
+    references: str = None
+    comment: str = None
 
 
 class BasicVarAttrs(BaseModel, extra=Extra.allow):
@@ -93,9 +97,14 @@ class FlagVarAttrs(BasicVarAttrs):
 
 
 class TimeVarAttrs(BaseModel):
+    """
+    Variable attribute model for time attributes, e.g.
+    - time
+    - time_bnds
+    """
     long_name: str
-    units: Optional[str]
-    calendar: Optional[Optional[str], Field(validate_default=True)] = "none"
+    units: Optional[str] = None
+    calendar: Annotated[Optional[str], Field(validate_default=False)] = None
 
     @field_validator("calendar")
     @classmethod
@@ -106,9 +115,15 @@ class TimeVarAttrs(BaseModel):
 
 
 class GridVarAttrs(BasicVarAttrs):
+    """
+    Grid variables.
+    """
     grid_mapping: str
-    cell_type: str = None
+    cell_methods: Optional[str] = None
 
 
 class GridFlagVarAttrs(FlagVarAttrs, GridVarAttrs):
     pass
+
+
+GlobalAttributeType = Union[BasicCFGlobalAttributes]
