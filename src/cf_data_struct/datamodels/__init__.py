@@ -7,7 +7,7 @@ This
 __author__ = "Stefan Hendricks <stefan.hendricks@awi.de>"
 
 from typing_extensions import Annotated
-from typing import Optional, Union, List, Tuple
+from typing import Optional, Union, List, Tuple, TypeVar
 
 from pydantic import BaseModel, Field, field_validator, model_validator, Extra
 
@@ -126,4 +126,6 @@ class GridFlagVarAttrs(FlagVarAttrs, GridVarAttrs):
     pass
 
 
+# Helper variable for typing
 GlobalAttributeType = Union[BasicCFGlobalAttributes]
+VariableAttributeType = TypeVar('U', bound=BasicVarAttrs)

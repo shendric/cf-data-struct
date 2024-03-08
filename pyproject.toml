@@ -30,6 +30,9 @@ dependencies = [
     "xarray"
 ]
 
+[project.optional-dependencies]
+tests = ['pytest']
+
 [project.urls]
 Homepage = "https://github.com/pysiral/cf-data-struct"
 Documentation = "https://github.com/pysiral/cf-data-struct#readme"

@@ -8,12 +8,15 @@ __author__ = "Stefan Hendricks <stefan.hendricks@awi.de>"
 
 import re
 import collections
-from typing import List, Dict, Tuple, Union, Type, Any
 import numpy as np
+import pydantic
 import xarray as xr
+from typing import List, Dict, Tuple, Union, Type, Any
 from pydantic import BaseModel
 
-from cf_data_struct.datamodels import GlobalAttributeType, BasicCFGlobalAttributes
+from cf_data_struct.datamodels import (
+    GlobalAttributeType, VariableAttributeType, BasicCFGlobalAttributes, BasicVarAttrs
+)
 
 VALID_DATATYPES = ["Grid", "Trajectory"]
 VALID_VARIABLE_TYPES = ["Standard", "Flag", "Uncertainty"]
@@ -21,57 +24,88 @@ VALID_VARIABLE_TYPES = ["Standard", "Flag", "Uncertainty"]
 
 class CFVariable(object):
     """
-    Represents a CF variable.
-
-    This class provides functionality to create and manipulate CF variables.
-
-    Args:
-        name (str): The name of the variable.
-        value (np.ndarray): The value of the variable.
-        dims (Union[str, Tuple[str], None]): The dimensions of the variable.
-        var_id (str, optional): The ID of the variable. If not provided, it is automatically generated.
-        attrs (Type[BaseModel], optional): The attributes of the variable.
-
-    Methods:
-        to_xarray_var: Converts the CFVariable to a xarray Variable.
-
     """
 
     def __init__(
             self,
             name: str,
             value: np.ndarray,
-            dims: Union[str, Tuple[str], None],
+            dims: Union[str, Tuple[str]],
             var_id: str = None,
-            time_dim_unlimited: bool = False,
-            attributes: Type[BaseModel] = None,
+            attributes: Union[VariableAttributeType, Dict] = None,
     ) -> None:
 
-        # TODO: Add name validation
-        self._name = name
-        self.value = value
-        self._dims = list(dims) if isinstance(dims, collections.abc.Iterable) else [dims]
-        self._time_dim_unlimited = time_dim_unlimited
-        self._attrs = attributes
-        self._var_id = var_id if var_id is not None else self._get_auto_id()
+        # Save attributes
+        self._name = self._validate_name(name)
+        self.value = self._validate_value(value)
+        self._dims = self._validate_dims(dims, value)
+        self._attrs = self._validate_attrs(attributes, self._name)
+        self._var_id = self._validate_var_id(var_id, name)
 
-    def _get_auto_id(self) -> str:
-        """
-        Guess a variable id from the variable name,
+    @staticmethod
+    def _validate_name(name: Any) -> str:
+        if not isinstance(name, str):
+            raise ValueError(f"`name` must be of type str: {name} [{type(name)}]")
+        return name
 
-        :return:
-        """
-        if "_" in self._name:
-            return ''.join(x[0] for x in self._name.split("_"))
-        return re.sub(r'[AEIOU]', '', self._name, flags=re.IGNORECASE)
+    @staticmethod
+    def _validate_value(value: Any) -> np.ndarray:
+        if not isinstance(value, collections.abc.Iterable):
+            raise ValueError(f"`name` must be of type Iterable: {value} [{type(value)}]")
+        return np.array(value)
 
-    def to_xarray_var(self) -> xr.Variable:
+    @staticmethod
+    def _validate_dims(dims: Any, value: np.ndarray) -> Tuple:
+        dims = tuple(dims) if isinstance(dims, collections.abc.Iterable) else [dims]
+        if not all(isinstance(dim, str) for dim in dims):
+            raise ValueError(f"all dimensions entries must be of type str: f{dims}")
+        if len(value.shape) != len(dims):
+            raise ValueError(f"Dimension mismatch: Data shape: {value.shape}, dimensions: {dims}")
+        return dims
+
+    @staticmethod
+    def _validate_attrs(attributes: Any, name: str) -> bool:
+        if isinstance(attributes, dict):
+            try:
+                attributes = BasicVarAttrs(**attributes)
+            except pydantic.ValidationError as error:
+                raise ValueError(f"Invalid CF variable attributes: {attributes}") from error
+        elif attributes is None:
+            attributes = BasicVarAttrs(long_name=name)
+        elif not issubclass(type(attributes), BasicVarAttrs): 
+            raise ValueError(
+                f"attribute type is neither dict nor known variable attribute object: "
+                f"{attributes} [{type(attributes)}]"
+            )
+        return attributes
+
+    @staticmethod
+    def _validate_var_id(var_id: Any, name: str) -> str:
+        if var_id is None:
+            if "_" in name:
+                var_id = ''.join(x[0] for x in name.split("_")).lower()
+            else:
+                var_id = re.sub(r'[AEIOU]', '', name, flags=re.IGNORECASE).lower()
+        elif not isinstance(var_id, str):
+            raise ValueError(f"{var_id=} not of type str: {type(var_id)}")
+        if not var_id.isidentifier():
+            raise ValueError(f"{var_id=} cannot be safely used as object attribute")
+        return var_id.lower()
+
+    def to_xarray_var(
+            self,
+            ignore_attributes: Union[List[str], Tuple[str, ...]] = None
+    ) -> xr.Variable:
         """
         Convert to xarray.Variable for export
 
         :return:
         """
         pass
+
+    @property
+    def dim_dict(self) -> Dict:
+        return dict(zip(self._dims, self.value.shape))
 
     @property
     def name(self) -> str:
@@ -82,15 +116,18 @@ class CFVariable(object):
         return str(self._var_id)
 
     @property
-    def dims(self) -> List[str]:
-        return list(self._dims)
+    def dims(self) -> Tuple[str, ...]:
+        return tuple(self._dims)
+
+    @property
+    def datatype(self):
+        return self.value.dtype
 
     def __str__(self) -> str:
         """"""
         return (
             f"{self.__class__.__name__} - {self._name}:\n"
             f"var_id             : {self._var_id}\n"
-            f"time_dim_unlimited : {self._time_dim_unlimited}\n"
             f"dimensions         : {self._dims} [{self.value.shape}]\n"
             f"attributes         : {self._attrs}"
         )
