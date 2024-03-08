@@ -8,8 +8,8 @@ __author__ = "Stefan Hendricks <stefan.hendricks@awi.de>"
 
 import pytest
 import numpy as np
-from typing import Dict
-from cf_data_struct.datastruct import CFVariable
+from typing import Dict, Tuple
+from cf_data_struct.datastruct import CFVariable, BasicVarAttrs
 
 
 @pytest.mark.parametrize(
@@ -62,3 +62,26 @@ def test_cfvariable_insufficient_input(test_input: Dict) -> None:
 def test_cfvariable_incorrect_input_type(test_input: Dict) -> None:
     with pytest.raises(ValueError):
         CFVariable(**test_input)
+
+
+@pytest.mark.parametrize(
+    "test_input, expected_result",
+    [
+        ({"name": "some_name", "value": np.zeros(10), "dims": "time"}, ("time",))
+    ]
+)
+def test_cfvariable_dims_cast_to_tuple(test_input: Dict, expected_result: Tuple[str, ...]) -> None:
+    var = CFVariable(**test_input)
+    assert var.dims == expected_result
+
+
+@pytest.mark.parametrize(
+    "test_input",
+    [
+        {"name": "some_name", "value": np.zeros(10), "dims": "time"},
+        {"name": "some_name", "value": np.zeros(10), "dims": "time", "attributes": {"long_name": "some_name"}}
+    ]
+)
+def test_cfvariable_varattr_object_created(test_input: Dict) -> None:
+    var = CFVariable(**test_input)
+    assert isinstance(var.attrs, BasicVarAttrs)

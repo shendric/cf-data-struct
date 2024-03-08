@@ -56,7 +56,7 @@ class CFVariable(object):
 
     @staticmethod
     def _validate_dims(dims: Any, value: np.ndarray) -> Tuple:
-        dims = tuple(dims) if isinstance(dims, collections.abc.Iterable) else [dims]
+        dims = tuple(dims) if isinstance(dims, collections.abc.Iterable) and not isinstance(dims, str) else (dims, )
         if not all(isinstance(dim, str) for dim in dims):
             raise ValueError(f"all dimensions entries must be of type str: f{dims}")
         if len(value.shape) != len(dims):
@@ -64,7 +64,7 @@ class CFVariable(object):
         return dims
 
     @staticmethod
-    def _validate_attrs(attributes: Any, name: str) -> bool:
+    def _validate_attrs(attributes: Any, name: str) -> VariableAttributeType:
         if isinstance(attributes, dict):
             try:
                 attributes = BasicVarAttrs(**attributes)
@@ -118,6 +118,10 @@ class CFVariable(object):
     @property
     def dims(self) -> Tuple[str, ...]:
         return tuple(self._dims)
+
+    @property
+    def attrs(self) -> VariableAttributeType:
+        return self._attrs.model_copy()
 
     @property
     def datatype(self):
