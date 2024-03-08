@@ -1,7 +1,12 @@
 # -*- coding: utf-8 -*-
 
 """
-This
+This module contains pydantic data models for
+
+- CF & ADDC global attributes
+- CF variable attributes
+
+with (limited) validation and templates for different data types.
 """
 
 __author__ = "Stefan Hendricks <stefan.hendricks@awi.de>"
@@ -41,6 +46,9 @@ flag_dtypes = Union[int, bytes]
 
 
 class BasicCFGlobalAttributes(BaseModel):
+    """
+    Minimum global attributes according to CF-Conventions
+    """
     title: str = None
     institution: str = None
     source: str = None
@@ -123,9 +131,12 @@ class GridVarAttrs(BasicVarAttrs):
 
 
 class GridFlagVarAttrs(FlagVarAttrs, GridVarAttrs):
+    """
+    A combination of datatype grid and flag variables.
+    """
     pass
 
 
 # Helper variable for typing
 GlobalAttributeType = Union[BasicCFGlobalAttributes]
-VariableAttributeType = TypeVar('U', bound=BasicVarAttrs)
+VariableAttributeType = TypeVar("VariableAttributeType", bound=BasicVarAttrs)

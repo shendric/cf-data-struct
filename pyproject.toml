@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cf_data_struct"
-description = "Data structures compliant to Climate & Forecast data conventions"
+description = "Data structures compliant to Climate & Forecast data conventions with netCDF export templates"
 readme = "README.md"
 version = "0.1"
 requires-python = ">=3.9"
@@ -24,6 +24,7 @@ classifiers = [
 
 dependencies = [
     "loguru",
+    "netcdf4",
     "numpy",
     "pydantic",
     "pydantic-yaml",

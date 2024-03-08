@@ -47,6 +47,9 @@ def test_cfvariable_insufficient_input(test_input: Dict) -> None:
         {"name": 1, "value": np.zeros(10), "dims": ("time",)},
         {"name": "some_name", "value": 10, "dims": ("time",)},
         {"name": "some_name", "value": np.zeros(10), "dims": 1},
+        # Incorrect name
+        {"name": "some name", "value": np.zeros(10), "dims": ("time",)},
+        {"name": "some-name", "value": np.zeros(10), "dims": ("time",)},
         # Incorrect variable id
         {"name": "some_name", "value": np.zeros(10), "dims": ("time",), "var_id": 10},
         {"name": "some_name", "value": np.zeros(10), "dims": ("time",), "var_id": "10"},
@@ -82,6 +85,6 @@ def test_cfvariable_dims_cast_to_tuple(test_input: Dict, expected_result: Tuple[
         {"name": "some_name", "value": np.zeros(10), "dims": "time", "attributes": {"long_name": "some_name"}}
     ]
 )
-def test_cfvariable_varattr_object_created(test_input: Dict) -> None:
+def test_cfvariable_varattr_cast_to_object(test_input: Dict) -> None:
     var = CFVariable(**test_input)
     assert isinstance(var.attrs, BasicVarAttrs)
