@@ -32,7 +32,12 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-tests = ['pytest']
+tests = [
+    "flake8",
+    "isort",
+    "pytest",
+    "coverage",
+]
 
 [project.urls]
 Homepage = "https://github.com/pysiral/cf-data-struct"

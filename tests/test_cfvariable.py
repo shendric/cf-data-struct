@@ -6,10 +6,12 @@ Software tests using pytests for the CFVariable and its children
 
 __author__ = "Stefan Hendricks <stefan.hendricks@awi.de>"
 
-import pytest
-import numpy as np
 from typing import Dict, Tuple
-from cf_data_struct.datastruct import CFVariable, BasicVarAttrs
+
+import numpy as np
+import pytest
+
+from cf_data_struct.datastruct import BasicVarAttrs, CFVariable
 
 
 @pytest.mark.parametrize(

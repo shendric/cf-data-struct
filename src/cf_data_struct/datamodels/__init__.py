@@ -11,10 +11,10 @@ with (limited) validation and templates for different data types.
 
 __author__ = "Stefan Hendricks <stefan.hendricks@awi.de>"
 
-from typing_extensions import Annotated
-from typing import Optional, Union, List, Tuple, TypeVar
+from typing import List, Optional, Tuple, TypeVar, Union
 
-from pydantic import BaseModel, Field, field_validator, model_validator, Extra
+from pydantic import BaseModel, Extra, Field, field_validator, model_validator
+from typing_extensions import Annotated
 
 # ISO 19115-1 codes
 VALID_COVERAGE_CONTENT_TYPE = [

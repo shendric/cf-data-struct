@@ -6,17 +6,17 @@
 
 __author__ = "Stefan Hendricks <stefan.hendricks@awi.de>"
 
-import re
 import collections
+import re
+from typing import Any, Dict, List, Tuple, Union
+
 import numpy as np
 import pydantic
 import xarray as xr
-from typing import List, Dict, Tuple, Union, Type, Any
-from pydantic import BaseModel
 
-from cf_data_struct.datamodels import (
-    GlobalAttributeType, VariableAttributeType, BasicCFGlobalAttributes, BasicVarAttrs
-)
+from cf_data_struct.datamodels import (BasicCFGlobalAttributes, BasicVarAttrs,
+                                       GlobalAttributeType,
+                                       VariableAttributeType)
 
 VALID_DATATYPES = ["Grid", "Trajectory"]
 VALID_VARIABLE_TYPES = ["Standard", "Flag", "Uncertainty"]
@@ -101,7 +101,7 @@ class CFVariable(object):
                 raise ValueError(f"Invalid CF variable attributes: {attributes}") from error
         elif attributes is None:
             attributes = BasicVarAttrs(long_name=name)
-        elif not issubclass(type(attributes), BasicVarAttrs): 
+        elif not issubclass(type(attributes), BasicVarAttrs):
             raise ValueError(
                 f"attribute type is neither dict nor known variable attribute object: "
                 f"{attributes} [{type(attributes)}]"
@@ -269,8 +269,6 @@ class CFStructBaseClass(object):
         """
         return []
 
-
-
     @property
     def datatype(self) -> str:
         return str(self._datatype)
@@ -286,9 +284,11 @@ class CFStructBaseClass(object):
     @property
     def variable_id_dict(self) -> Dict:
         return self._var_id_dict.copy()
+
     @property
     def variable_ids(self) -> List[str]:
         return list(self._var_id_dict.keys())
+
 
 class TrajectoryCFStruct(CFStructBaseClass):
 

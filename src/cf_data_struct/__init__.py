@@ -6,10 +6,8 @@ The datastruct models contains the data structures
 
 __author__ = "Stefan Hendricks <stefan.hendricks@awi.de>"
 
-from cf_data_struct.datastruct import (
-    TrajectoryCFStruct, GridCFStruct,
-    CFVariable
-)
+from cf_data_struct.datastruct import (CFVariable, GridCFStruct,
+                                       TrajectoryCFStruct)
 
 __all__ = ["datamodels", "datastruct", "TrajectoryCFStruct", "GridCFStruct", "CFVariable"]
 
