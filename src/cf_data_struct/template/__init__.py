@@ -100,6 +100,7 @@ class TemplateEngine:
         :param template: The template string to be rendered.
         :return: The rendered string with context variables filled in.
         """
+        template = self._expand_dict_like_statements(template)
         return template.format(**self._context.root)
 
     def _expand_dict_like_statements(self, template: str) -> str:
@@ -119,23 +120,26 @@ class TemplateEngine:
 
         :param template: The template string to be filled.
 
-        :return: The filled string with context variables.
+        :return: The filled string with context variable
         """
+
+        # Ensure that the original template remains unchanged for error handling and debugging purposes
+        template_new = str(template)
 
         # Use a regular expression to find all instances of `{dict_name[key_name]}`
         # with an optional format specifier after the closing bracket.
         dict_pattern = re.compile(r"\{(\w+)\[(\w+)\](?::\w+)?\}")
-        matches = dict_pattern.findall(template)
+        matches = dict_pattern.findall(template_new)
 
         for match in matches:
             dict_name, key_name = match
             if key_name not in self._context:
-                return template
+                return template_new
             if dict_name not in self._dynamic_variables:
-                return template
+                return template_new
             key_var = self._context[key_name]
             if dict_name in self._dynamic_variables:
                 value = self._dynamic_variables[dict_name][key_var]
-                template = template.replace(f"{{{dict_name}[{key_name}]}}", value)
+                template_new = template_new.replace(f"{{{dict_name}[{key_name}]}}", value)
 
-        return template
+        return template_new
