@@ -6,6 +6,7 @@ dictionary like definitions.
 """
 
 __author__ = "Stefan Hendricks <stefan.hendricks@awi.de>"
+__all__ = ["TemplateEngine", "ContextAttributes", "TemplateFillValues"]
 
 import re
 from typing import Dict, Any, Union, List, Callable, Optional
@@ -30,10 +31,11 @@ class ContextAttributes(RootModel[Dict[str, Any]]):
             str: StrExtendedFormatOptions
         }
         for key, value in values.items():
-            value_type = type(value)
             # This will replace the value with a type with extended formatting options if one is defined
             # for the original type, otherwise it will keep the original type
-            values[key] = extended_format_types_dict.get(value_type, value_type)(value)
+            extended_format_type = extended_format_types_dict.get(type(value))
+            if extended_format_type:
+                values[key] = extended_format_type(value)
         return values
 
     @property

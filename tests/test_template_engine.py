@@ -51,3 +51,17 @@ def test_template_engine_extended_str_formats():
     rendered_template = t.render("{latency_lower:upper} {latency_upper:lower}")
     expected_output = "NRT nrt"
     assert rendered_template == expected_output, f"Expected '{expected_output}', but got '{rendered_template}'"
+
+
+def test_template_engine_datetime_formats():
+    """
+    Test the TemplateEngine class with datetime attributes.
+    """
+    from datetime import datetime
+    from cf_data_struct.template import TemplateEngine
+
+    context_attributes = {"time_coverage_start": datetime(2020, 1, 1, 12, 10, 30)}
+    t = TemplateEngine(context_attributes=context_attributes)
+    rendered_template = t.render("{time_coverage_start:%Y-%m-%d %H:%M:%S}")
+    expected_output = "2020-01-01 12:10:30"
+    assert rendered_template == expected_output, f"Expected '{expected_output}', but got '{rendered_template}'"
