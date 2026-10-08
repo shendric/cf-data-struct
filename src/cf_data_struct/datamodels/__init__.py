@@ -58,8 +58,8 @@ class Calendar(StrEnum):
         return [e.value for e in cls]
 
 
-numeric = Union[int, float]
-flag_dtypes = Union[int, bytes]
+NUMERIC_TYPE = Union[int, float]
+FLAG_DTYPES = Union[int, bytes]
 
 
 class BasicCFGlobalAttributes(BaseModel):
@@ -89,16 +89,16 @@ class BasicVarAttrs(BaseModel, extra=Extra.allow):
 
     long_name: str
     standard_name: Optional[str] = None
-    scale_factor: Optional[numeric] = None
-    add_offset: Optional[numeric] = None
-    actual_range: Optional[Tuple[numeric, numeric]] = None
-    missing_value: Optional[numeric] = None
+    scale_factor: Optional[NUMERIC_TYPE] = None
+    add_offset: Optional[NUMERIC_TYPE] = None
+    actual_range: Optional[Tuple[NUMERIC_TYPE, NUMERIC_TYPE]] = None
+    missing_value: Optional[NUMERIC_TYPE] = None
     comment: Optional[str] = None
     units: Optional[str] = None
     ancillary_variables: Optional[str] = None
     coverage_content_type: Optional[ContentType] = None
-    valid_min: Optional[numeric] = None
-    valid_max: Optional[numeric] = None
+    valid_min: Optional[NUMERIC_TYPE] = None
+    valid_max: Optional[NUMERIC_TYPE] = None
 
     # noinspection PyNestedDecorators
     @field_validator("coverage_content_type")
@@ -111,7 +111,7 @@ class BasicVarAttrs(BaseModel, extra=Extra.allow):
 
 class FlagVarAttrs(BasicVarAttrs):
     flag_meanings: str
-    flag_values: List[flag_dtypes]
+    flag_values: List[FLAG_DTYPES]
     unit: str = "1"
 
     @model_validator(mode="after")
