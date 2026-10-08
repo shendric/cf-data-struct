@@ -11,35 +11,52 @@ with (limited) validation and templates for different data types.
 
 __author__ = "Stefan Hendricks <stefan.hendricks@awi.de>"
 
+from enum import StrEnum
+
 from typing import List, Optional, Tuple, TypeVar, Union
 
 from pydantic import BaseModel, Extra, Field, field_validator, model_validator
 from typing_extensions import Annotated
 
-# ISO 19115-1 codes
-VALID_COVERAGE_CONTENT_TYPE = [
-    "image",
-    "thematicClassification",
-    "physicalMeasurement",
-    "auxiliaryInformation",
-    "qualityInformation",
-    "referenceInformation",
-    "modelResult",
-    "coordinate"
-]
 
-VALID_CALENDARS = [
-    "gregorian",
-    "standard",
-    "proleptic_gregorian",
-    "noleap",
-    "365_day",
-    "all_leap",
-    "366_day",
-    "360_day",
-    "julian",
-    "none"
-]
+# ISO 19115-1 codes
+class ContentType(StrEnum):
+    """
+    Valid content types (ISO 19115-1 code) according to ACCD conventions:
+    https://wiki.esipfed.org/Attribute_Convention_for_Data_Discovery_1-3
+    """
+    IMAGE = "image"
+    THEMATIC_CLASSIFICATION = "thematicClassification"
+    PHYSICAL_MEASUREMENT = "physicalMeasurement"
+    AUXILIARY_INFORMATION = "auxiliaryInformation"
+    QUALITY_INFORMATION = "qualityInformation"
+    REFERENCE_INFORMATION = "referenceInformation"
+    MODEL_RESULT = "modelResult"
+    COORDINATE = "coordinate"
+
+    def entries(cls) -> List[str]:
+        return [e.value for e in cls]
+
+
+class Calendar(StrEnum):
+    """
+    Valid calendar types according to CF conventions:
+    https://cfconventions.org/cf-conventions/cf-conventions.html#calendar
+    """
+    GREGORIAN = "gregorian"
+    STANDARD = "standard"
+    PROLEPTIC_GREGORIAN = "proleptic_gregorian"
+    NOLEAP = "noleap"
+    _365_DAY = "365_day"
+    ALL_LEAP = "all_leap"
+    _366_DAY = "366_day"
+    _360_DAY = "360_day"
+    JULIAN = "julian"
+    NONE = "none"
+
+    def entries(cls) -> List[str]:
+        return [e.value for e in cls]
+
 
 numeric = Union[int, float]
 flag_dtypes = Union[int, bytes]
@@ -79,7 +96,7 @@ class BasicVarAttrs(BaseModel, extra=Extra.allow):
     comment: Optional[str] = None
     units: Optional[str] = None
     ancillary_variables: Optional[str] = None
-    coverage_content_type: Annotated[Optional[str], Field(validate_default=False)] = None
+    coverage_content_type: Optional[ContentType] = None
     valid_min: Optional[numeric] = None
     valid_max: Optional[numeric] = None
 
@@ -87,8 +104,8 @@ class BasicVarAttrs(BaseModel, extra=Extra.allow):
     @field_validator("coverage_content_type")
     @classmethod
     def valid_coverage_content_type(cls, coverage_content_type: str) -> str:
-        if coverage_content_type not in VALID_COVERAGE_CONTENT_TYPE:
-            raise ValueError(f"{coverage_content_type=} not in {VALID_COVERAGE_CONTENT_TYPE=}")
+        if coverage_content_type not in ContentType.__members__:
+            raise ValueError(f"{coverage_content_type=} not in {list(ContentType.entries())=}")
         return coverage_content_type
 
 
@@ -117,8 +134,8 @@ class TimeVarAttrs(BaseModel):
     @field_validator("calendar")
     @classmethod
     def valid_calendar(cls, calendar: str) -> str:
-        if calendar not in VALID_CALENDARS:
-            raise ValueError(f"{calendar=} not in {VALID_CALENDARS=}")
+        if calendar not in Calendar:
+            raise ValueError(f"{calendar=} not in {Calendar.entries()=}")
         return calendar
 
 
